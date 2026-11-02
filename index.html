@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>5-Day Hybrid Workout Tracker</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-card: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      padding: 12px;
+      padding-bottom: 90px;
+      display: flex;
+      justify-content: center;
+    }
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .header-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .day-selector {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .day-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px 4px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .day-btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+    .workout-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+    }
+    .exercise-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .exercise-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .exercise-meta {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .exercise-notes {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    .setup-input-group {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .setup-input-group label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .setup-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      width: 100%;
+    }
+    .sets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    @media (min-width: 600px) {
+      .sets-grid {
+        gap: 12px;
+      }
+    }
+    .set-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+    }
+    .set-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .set-inputs {
+      display: flex;
+      gap: 4px;
+    }
+    .set-inputs input {
+      width: 50%;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #fff;
+      padding: 6px 4px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .set-inputs input::placeholder {
+      font-size: 0.7rem;
+      color: #64748b;
+      font-weight: 400;
+    }
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      z-index: 100;
+    }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+    .timer-container {
+      background: #0b1329;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .timer-display {
+      font-family: monospace;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .timer-controls {
+      display: flex;
+      gap: 6px;
+    }
+    .timer-btn {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--success);
+      color: #052e16;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast">Changes Saved Locally!</div>
+  
+  <div class="app-container">
+    <header>
+      <div>
+        <h1>IronLog Hybrid</h1>
+        <div class="header-sub">Mon-Wed Gym • Thu-Fri Home Bowflex</div>
+      </div>
+      <div>
+        <button class="btn btn-secondary" onclick="exportData()" style="padding: 6px 10px; font-size: 0.75rem;">Export CSV</button>
+      </div>
+    </header>
+
+    <!-- Rest Timer Component -->
+    <div class="timer-container">
+      <div>
+        <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">REST TIMER</span>
+        <span class="timer-display" id="timerDisplay">00:00</span>
+      </div>
+      <div class="timer-controls">
+        <button class="timer-btn" onclick="startTimer(45)">45s</button>
+        <button class="timer-btn" onclick="startTimer(60)">60s</button>
+        <button class="timer-btn" onclick="startTimer(75)">75s</button>
+        <button class="timer-btn" onclick="startTimer(90)">90s</button>
+        <button class="timer-btn" onclick="resetTimer()" style="color: #f87171;">✕</button>
+      </div>
+    </div>
+
+    <!-- Day Navigation -->
+    <div class="day-selector">
+      <button class="day-btn active" onclick="switchDay('mon')">Mon<br><small style="font-size:0.65rem">Gym</small></button>
+      <button class="day-btn" onclick="switchDay('tue')">Tue<br><small style="font-size:0.65rem">Gym</small></button>
+      <button class="day-btn" onclick="switchDay('wed')">Wed<br><small style="font-size:0.65rem">Gym</small></button>
+      <button class="day-btn" onclick="switchDay('thu')">Thu<br><small style="font-size:0.65rem">Home</small></button>
+      <button class="day-btn" onclick="switchDay('fri')">Fri<br><small style="font-size:0.65rem">Home</small></button>
+    </div>
+
+    <!-- Workout Content Container -->
+    <div id="workoutContainer"></div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-secondary" onclick="clearDay()">Clear Day</button>
+    <button class="btn btn-primary" onclick="saveDay()">Save Day</button>
+  </div>
+
+  <script>
+    const workoutData = {
+      mon: {
+        title: "Monday: Knee-Dominant & Horizontal Push/Pull",
+        venue: "Gym",
+        cardio: "Treadmill 30 mins (steady run/walk) + 5 min Dynamic Warm-up",
+        exercises: [
+          { id: "m_legpress", name: "Leg Press", target: "3 sets x 8-10 reps (Rest: 90s)", setupLabel: "Machine Seat/Platform", notes: "Avoid lower back rounding at bottom." },
+          { id: "m_chestpress", name: "Chest Press Machine", target: "3 sets x 8-10 reps (Rest: 90s)", setupLabel: "Seat Height Setting", notes: "Handles mid-chest; squeeze chest at lockout." },
+          { id: "m_row", name: "Seated Cable Row", target: "3 sets x 10-12 reps (Rest: 75s)", setupLabel: "Attachment / Pin", notes: "Close neutral V-grip; squeeze shoulder blades." },
+          { id: "m_legcurl", name: "Lying or Seated Leg Curl", target: "3 sets x 10-12 reps (Rest: 60s)", setupLabel: "Pad Setting", notes: "Controlled 2-second eccentric lowering." },
+          { id: "m_latraise", name: "Machine Lateral Raise", target: "3 sets x 12-15 reps (Rest: 60s)", setupLabel: "Seat / Height", notes: "Lead with elbows; smooth constant tension." }
+        ]
+      },
+      tue: {
+        title: "Tuesday: Hip-Dominant & Vertical Push/Pull",
+        venue: "Gym",
+        cardio: "Treadmill 30 mins (steady run/walk) + 5 min Dynamic Warm-up",
+        exercises: [
+          { id: "t_latpull", name: "Lat Pulldown", target: "3 sets x 8-10 reps (Rest: 90s)", setupLabel: "Bar / Thigh Pad", notes: "Wide/neutral grip; pull elbows straight down." },
+          { id: "t_smithrdl", name: "Smith Machine RDL", target: "3 sets x 8-10 reps (Rest: 90s)", setupLabel: "Bar Starting Height", notes: "Hinge hips back, soft knees, load hamstrings." },
+          { id: "t_shoulderpress", name: "Seated Machine Shoulder Press", target: "3 sets x 8-10 reps (Rest: 75s)", setupLabel: "Seat Height", notes: "Back flat to pad; stop chin-level before press." },
+          { id: "t_legext", name: "Leg Extension", target: "3 sets x 12-15 reps (Rest: 60s)", setupLabel: "Back/Shin Pad", notes: "1-second peak squeeze at full lockout." },
+          { id: "t_facepull", name: "Cable Rope Face Pull", target: "3 sets x 12-15 reps (Rest: 60s)", setupLabel: "Eye-level Pulley", notes: "Pull to forehead; external shoulder rotation." }
+        ]
+      },
+      wed: {
+        title: "Wednesday: Hypertrophy & Unilateral Balance",
+        venue: "Gym",
+        cardio: "Treadmill 30 mins (steady run/walk) + 5 min Dynamic Warm-up",
+        exercises: [
+          { id: "w_hacksquat", name: "Hack Squat / Sled Press", target: "3 sets x 8-10 reps (Rest: 90s)", setupLabel: "Foot Placement", notes: "Deep knee bend; heels glued flat." },
+          { id: "w_inclinepress", name: "Incline Machine Chest Press", target: "3 sets x 10-12 reps (Rest: 75s)", setupLabel: "Seat Height", notes: "Upper chest focus; controlled lowering." },
+          { id: "w_tbar", name: "Chest-Supported T-Bar / Machine Row", target: "3 sets x 10-12 reps (Rest: 75s)", setupLabel: "Chest Pad Height", notes: "Chest stays firmly pressed to pad." },
+          { id: "w_pullthru", name: "Cable Pull-Through", target: "3 sets x 12-15 reps (Rest: 60s)", setupLabel: "Low Rope Pulley", notes: "Explosive hip extension; squeeze glutes." },
+          { id: "w_triceps", name: "Cable Triceps Pushdown", target: "3 sets x 10-12 reps (Rest: 60s)", setupLabel: "Rope / Straight Bar", notes: "Pin elbows against ribs." },
+          { id: "w_biceps", name: "Cable Biceps Curl", target: "3 sets x 10-12 reps (Rest: 60s)", setupLabel: "Straight / EZ Bar", notes: "Strict curl without torso swinging." }
+        ]
+      },
+      thu: {
+        title: "Thursday: Core Bracing & Posterior Chain",
+        venue: "Home (Bowflex & Bench)",
+        cardio: "Active Recovery Day (No Treadmill)",
+        exercises: [
+          { id: "th_deadbug", name: "Dead Bug DB Pullover Hold", target: "3 sets x 8-10 reps/leg (Rest: 60s)", setupLabel: "Starting DB: 10 lbs", notes: "Lower back glued to mat as leg extends." },
+          { id: "th_legraise", name: "Bench Flat / Decline Leg Raise", target: "3 sets x 10-12 reps (Rest: 60s)", setupLabel: "Bench Angle", notes: "Grip bench behind head; roll pelvis upward." },
+          { id: "th_woodchop", name: "Half-Kneeling DB Woodchopper", target: "3 sets x 10 reps/side (Rest: 45s)", setupLabel: "Starting DB: 10 lbs", notes: "Diagonal lift; lock hips facing forward." },
+          { id: "th_glutebridge", name: "DB Single-Leg Glute Bridge", target: "2-3 sets x 12 reps/side (Rest: 45s)", setupLabel: "Starting DB: BW to 15 lbs", notes: "Drive through heel; open hip flexors." },
+          { id: "th_bodysaw", name: "Forearm Plank to Body Saw", target: "3 sets x 30-45 sec (Rest: 45s)", setupLabel: "Floor / Mat", notes: "Rock forward/back from toes." }
+        ]
+      },
+      fri: {
+        title: "Friday: Abdominal Flexion & Loaded Carry",
+        venue: "Home (Bowflex & Bench)",
+        cardio: "Active Recovery Day (No Treadmill)",
+        exercises: [
+          { id: "fr_crunch", name: "Bench Weighted Crunch", target: "3 sets x 12-15 reps (Rest: 60s)", setupLabel: "Starting DB: 15 lbs", notes: "Hold DB across collarbone; curl ribs down." },
+          { id: "fr_sideplank", name: "Side Plank with DB Hold", target: "3 sets x 30 sec/side (Rest: 45s)", setupLabel: "Starting DB: 5-7.5 lbs", notes: "Hold DB pointed straight to ceiling." },
+          { id: "fr_russian", name: "Seated DB Russian Twist", target: "3 sets x 12 reps/side (Rest: 45s)", setupLabel: "Starting DB: 10 lbs", notes: "Torso at 45°; rotate ribcage controlled." },
+          { id: "fr_suitcase", name: "Dumbbell Suitcase Carry", target: "3 sets x 40-50 steps/side (Rest: 60s)", setupLabel: "Starting DB: 30-35 lbs", notes: "One DB only; walk tall without leaning." },
+          { id: "fr_hyper", name: "Bench Reverse Hyper", target: "2-3 sets x 12-15 reps (Rest: 45s)", setupLabel: "Flat Bench", notes: "Prone on bench, lift legs to decompress back." }
+        ]
+      }
+    };
+
+    let currentDay = "mon";
+
+    function init() {
+      // Auto-detect current weekday
+      const dayNum = new Date().getDay();
+      if (dayNum === 2) currentDay = "tue";
+      else if (dayNum === 3) currentDay = "wed";
+      else if (dayNum === 4) currentDay = "thu";
+      else if (dayNum === 5) currentDay = "fri";
+      else currentDay = "mon";
+
+      renderDay();
+    }
+
+    function switchDay(day) {
+      currentDay = day;
+      document.querySelectorAll(".day-btn").forEach((btn, idx) => {
+        const days = ["mon", "tue", "wed", "thu", "fri"];
+        if (days[idx] === day) btn.classList.add("active");
+        else btn.classList.remove("active");
+      });
+      renderDay();
+    }
+
+    function renderDay() {
+      const data = workoutData[currentDay];
+      const saved = JSON.parse(localStorage.getItem("ironlog_" + currentDay) || "{}");
+      const container = document.getElementById("workoutContainer");
+
+      let html = `
+        <div style="margin-bottom: 14px;">
+          <h2 style="font-size: 1.1rem; color: #fff; margin-bottom: 4px;">${data.title}</h2>
+          <div style="font-size: 0.8rem; color: var(--accent);">${data.cardio}</div>
+        </div>
+      `;
+
+      data.exercises.forEach(ex => {
+        const exState = saved[ex.id] || { setup: "", sets: [ {w:"", r:""}, {w:"", r:""}, {w:"", r:""} ] };
+        html += `
+          <div class="workout-card" data-ex-id="${ex.id}">
+            <div class="exercise-header">
+              <span class="exercise-title">${ex.name}</span>
+            </div>
+            <div class="exercise-meta">${ex.target}</div>
+            <div class="exercise-notes">${ex.notes}</div>
+            
+            <div class="setup-input-group">
+              <label>${ex.setupLabel}:</label>
+              <input type="text" class="setup-input" value="${exState.setup || ""}" placeholder="e.g., Seat 3, Pin 4, 15 lbs">
+            </div>
+
+            <div class="sets-grid">
+              ${[0, 1, 2].map(idx => `
+                <div class="set-box">
+                  <div class="set-title">Set ${idx + 1}</div>
+                  <div class="set-inputs">
+                    <input type="number" inputmode="decimal" class="set-weight" placeholder="lbs" value="${exState.sets[idx]?.w || ""}">
+                    <input type="number" inputmode="numeric" class="set-reps" placeholder="reps" value="${exState.sets[idx]?.r || ""}">
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function saveDay() {
+      const data = workoutData[currentDay];
+      const payload = {};
+
+      document.querySelectorAll(".workout-card").forEach(card => {
+        const exId = card.getAttribute("data-ex-id");
+        const setup = card.querySelector(".setup-input").value;
+        const weights = card.querySelectorAll(".set-weight");
+        const reps = card.querySelectorAll(".set-reps");
+
+        payload[exId] = {
+          setup: setup,
+          sets: [
+            { w: weights[0].value, r: reps[0].value },
+            { w: weights[1].value, r: reps[1].value },
+            { w: weights[2].value, r: reps[2].value }
+          ]
+        };
+      });
+
+      localStorage.setItem("ironlog_" + currentDay, JSON.stringify(payload));
+      showToast("Saved to Device!");
+    }
+
+    function clearDay() {
+      if (confirm(`Clear all logged values for ${currentDay.toUpperCase()}?`)) {
+        localStorage.removeItem("ironlog_" + currentDay);
+        renderDay();
+        showToast("Day Cleared");
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 1800);
+    }
+
+    // Timer logic
+    let timerInterval = null;
+    let secondsRemaining = 0;
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      secondsRemaining = seconds;
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        secondsRemaining--;
+        if (secondsRemaining <= 0) {
+          clearInterval(timerInterval);
+          secondsRemaining = 0;
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      secondsRemaining = 0;
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(secondsRemaining / 60);
+      const secs = secondsRemaining % 60;
+      document.getElementById("timerDisplay").innerText = 
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Export to CSV
+    function exportData() {
+      let csv = "Day,Exercise,Setup,Set 1 Lbs,Set 1 Reps,Set 2 Lbs,Set 2 Reps,Set 3 Lbs,Set 3 Reps\n";
+      const days = ["mon", "tue", "wed", "thu", "fri"];
+      
+      days.forEach(day => {
+        const saved = JSON.parse(localStorage.getItem("ironlog_" + day) || "{}");
+        const meta = workoutData[day];
+        meta.exercises.forEach(ex => {
+          const row = saved[ex.id] || { setup: "", sets: [{}, {}, {}] };
+          csv += `"${day.toUpperCase()}","${ex.name}","${row.setup || ''}","${row.sets[0]?.w || ''}","${row.sets[0]?.r || ''}","${row.sets[1]?.w || ''}","${row.sets[1]?.r || ''}","${row.sets[2]?.w || ''}","${row.sets[2]?.r || ''}"\n`;
+        });
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("href", url);
+      a.setAttribute("download", `workout_log_${new Date().toISOString().slice(0,10)}.csv`);
+      a.click();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
+
